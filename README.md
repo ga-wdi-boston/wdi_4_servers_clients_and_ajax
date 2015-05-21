@@ -1,215 +1,105 @@
 ![General Assembly Logo](http://i.imgur.com/ke8USTq.png)
 
-# Relationships between Objects in Ruby
+# Servers, Clients, JSON, and AJAX
 
 ## Introduction
 
-The idea behind object oriented programming is to model the real world as a set of  objects and the interactions and relationships between them.  Now that we have something of a grasp of what objects are, we turn to the relationshps between them, and we're going to throw in a bit of computer science theory too.
-
+Everyone knows about web servers, right?  Let's see....
 
 ## Objectives
 
-By the end of this session, students should be able to:
+By the end of the lesson, students should be able to do the following: 
 
-- Classify object relationships as has-a (composition), is-a (inheritance), or something else.
-- Write code that correctly implemnts a class-based inheritance relationship\  
-
+* Explain the concerns and responsibilities of the client and the server in a web application 
+* Examine an HTTP request or response and glean useful information from it
+* Implement a client for a simple REST service
 
 ## Vocabulary 
 
-inheritance; composition; is-a; has-a; has-one; has-many; superclass; override; polymorphic, dispatch; data type; abstract data type; duck typing.
+client, server, request, response, header, body, JSON, ajax
 
-## The two common relationships
+## Let's look at the web's plumbing
 
-In every system of objects, the two relationshps we find most often are that an object owns another object -- the "has-a" relationship and that an object is just like another object, but with some extra code or changed beha9ior.
+The core of it:  a web client (which may be a browser) makes a request to a web server.  A web server makes a response.
 
-For instance, suppose we are writing software to support human resources departments.  Right We have an Employee object 
+Go to Chrome.  Open the Javascript console. Choose the Network tab, make sure the red "record" button is red and "Preserve log" is checked.
 
+Then go to your favorite website.
 
-## Instructions
+Down the left side of the screen you see all the requests that went into assembling that webpage.
 
-Fork and clone this repository, then
+Click on one line, and you can look at all the data that went back and forth for that one request.
 
-```bash
-$ cd wdi_4_ruby_collections
-$ subl .
-$ pry
+## Look for patterns
+
+Before I tell you what's important, I want you to look at the Request and Response headers and guess at what you think is important.
+
+With a partner, choose five websites.  Make a list of all the the Request and Response headers for the websites.  Make a guess as to what each does.
+
+## Useful tools in Chrome: jquery-injector
+
+We're going to be poking at other people's code. The easiest way to do this is with jQuery, but not all websites use it.  But because you are in control of your web browser, you can inject it.
+
+You can find it [here](https://chrome.google.com/webstore/detail/jquery-injector/indebdooekgjhkncmgbkeopjebofdoid?hl=en).
+
+## Try it and see
+
+With a partner, go to your favorite web page and try out some jQuery on it.
+
+Do silly things.  How many <P> tags does it have? Can you make every other paragraph bold? 
+
+## AJAX!
+
+```javascript
+$.ajax({
+    method: 'GET',
+    url: "foo.html",
+    data: { name: 'joe', age: 34 }
+}).done (function(msg) {
+    // ...
+}).fail (function(msg) {
+    // ...
+});
 ```
 
-```ruby
-[1] pry(main)>
+```javascript
+var ajaxHandle = $.ajax({
+    method: 'GET',
+    url: "foo.html",
+    data: { name: 'joe', age: 34 }
+});
+
+ajaxHandle.done (function(msg) {
+    // ...
+});
+
+ajaxHandle.fail (function(msg) {
+    // ...
+});
 ```
 
-## Ruby Array
+## Useful tools in Chrome: Postman
 
-Ruby arrays are used to store and manipulate generalized lists
+We're also going to be poking at JSON.  You can do this from the console, but it's more effective with a tool like [Postman](https://chrome.google.com/webstore/detail/postman-rest-client/fdmmgilgnpjigdojojpjoooidkmcomcm)
 
-There are multiple ways to create a new array.
+## Implement a REST service
 
-```ruby
-[1] pry(main)> friends = []
-=> []
-[2] pry(main)> friends = Array.new
-=> []
-[3] pry(main)> friends = Array.new(3)
-=> [nil, nil, nil]
-[4] pry(main)> friends = Array.new(3, "")
-=> ["", "", ""]
-[5] pry(main)> friends.clear
-=> []
-[6] pry(main)> friends
-=> []
-```
+We have a chat server!  
 
-And multiple ways to add entries.
+But to use it, you have to implement a chat client.
 
-```ruby
-[7] pry(main)> friends << "Amy"
-=> ["Amy"]
-[8] pry(main)> friends[friends.length] = "Bob"
-=> "Bob"
-[9] pry(main)> friends.push "Chris"
-=> ["Amy", "Bob", "Chris"]
-[10] pry(main)> coworkers = "Amy, Chris, Daryl".split /\W+/
-=> ["Amy", "Chris", "Daryl"]
-```
+The chat server is a REST server with three endpoints:
 
-And powerful operations expressed simply
+### POST /register 
 
-```ruby
-[11] pry(main)> friends - coworkers
-=> ["Bob"]
-[12] pry(main)> friends + coworkers
-=> ["Amy", "Bob", "Chris", "Amy", "Chris", "Daryl"]
-[13] pry(main)> (friends + coworkers).sort.uniq
-=> ["Amy", "Bob", "Chris", "Daryl"]
-[14] pry(main)> friends | coworkers
-=> ["Amy", "Bob", "Chris", "Daryl"]
-[15] pry(main)>
-```
+Input: nickname 
+Output: token
 
-And other ways to create arrays that we'll talk about later.
+### POST /say
 
-```ruby
-[1] pry(main)> (1..10).map(&:itself)
-=> [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-```
+Input: token, message
+Output: message information
 
-### Brainstorm
-
-What are some types of lists?
-
-What are some things we'd put on those lists (let's stick to strings for now)?
-
-###  Pair and share
-
-Create a file called lists.rb and using a list or lists from the brainstorm, can you figure out, and write code to:
-
-- Delete a specific item from the list?
-- Delete an item at a specific position in the list?
-- Remove and add an item from the front of the list?
-- Find the intersection of two lists (items that are on both)?
-
-If possible, keep track of what you tried that didn't work to share with the class.  Use `pry -r ./lists.rb` to load the file at the start of a pry session.
-
-## Iterating over the elements in an list
-
-```ruby
-[1] pry(main)> scores = [3, 5, 4, 2, 4, 5]
-=> [3, 5, 4, 2, 4, 5]
-[3] pry(main)> average = scores.reduce(:+)/scores.length
-=> 3
-[4] pry(main)> average = scores.reduce(:+)/scores.length.to_f
-=> 3.8333333333333335
-[5] pry(main)> scores.map {|e| e * 2 }
-=> [6, 10, 8, 4, 8, 10]
-[6] pry(main)> scores.map{|e| e * 2 }.reduce(:+)/scores.length
-=> 7
-[7] pry(main)> scores.map{|e| e * 2 }.reduce(:+)/scores.length.to_f
-=> 7.666666666666667
-[8] pry(main)>
-```
-
-Method chaining is a Ruby idiom.
-
-## Pry lab (arrays)
-
-### We're stuck in loops! (again)
-
-- Run the script `pry/lab.rb` in your terminal  `$ ruby pry/array.rb`
-- At each binding.pry you'll be kicked into pry.
-- Change the value of the arrays to break out of the loop.  Be clever and prepared to share with the class!
-- Type `exit` to resume program execution.
-- Try typing `exit` without changing anything to see what happens.
-- When you get to the bottom of the lab, you're done.
-
-## Ruby Hash
-
-In Ruby, a Hash is a mapping from one object, the key, to another object, the value.
-
-### Why symbols?
-
-Any object may be used as a key in a Hash.  Symbols are unique objects throughout your program.  Strings are not.  Comparing by object id
-
-```ruby
-[1] pry(main)> "cvv".object_id == "cvv".object_id
-=> false
-[2] pry(main)> :cvv.object_id == :cvv.object_id
-=> true
-[3] pry(main)> :cvv.equal? :cvv
-=> true
-[4] pry(main)>
-```
-
-### Hash literal syntax
-
-```ruby
-[4] pry(main)> cc = {:number => '01123581321', :ccv => '321', :name => "Joe Isuzu"}
-=> {:number=>"01123581321", :ccv=>"321", :name=>"Joe Isuzu"}
-[5] pry(main)> cc = {number: '01123853121', ccv: '231', name: "Bob Isuzu"}
-=> {:number=>"01123853121", :ccv=>"231", :name=>"Bob Isuzu"}
-[6] pry(main)>
-```
-We have to use the former syntax if a key isn't a symbol.
-
-### Hash constructor syntax
-
-```ruby
-[1] pry(main)> counters = Hash.new(0)
-=> {}
-[2] pry(main)> scores = Hash.new(0)
-=> {}
-[3] pry(main)> scores[:boston]
-=> 0
-[4] pry(main)> scores[:boston] += 1
-=> 1
-[5] pry(main)> scores[:yankees]
-=> 0
-[6] pry(main)>
-```
-
-### Brainstorm
-
-What could we store in a hash?
-
-What would we use to store hashes?
-
-###  Pair and share
-
-Create a file called hashes.rb.  Create a few hashes using examples from the brainstorm.  Read/update/delete values in those hashes.  What happens
-
-## Pry lab (hashes)
-
-### We're stuck in loops! (yet again)
-
-- Run the script `pry/lab.rb` in your terminal  `$ ruby pry/hash.rb`
-- At each binding.pry you'll be kicked into pry.
-- Change the value of the arrays to break out of the loop.  Be clever and prepared to share with the class!
-- Type `exit` to resume program execution.
-- Try typing `exit` without changing anything to see what happens.
-- When you get to the bottom of the lab, you're done.
-
-
-## Enumerable
-
-TBD
+### GET /fetch
+Optional input: token, from, count
+Output: list of messages
